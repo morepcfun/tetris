@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tetris Block Puzzle Game</title>
+<meta name="author" content="Johnny Heggelund">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<style>
+body::before {
+content: '';
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100vh;
+z-index: -1;
+background-image: url("data:image/svg+xml,<svg width='40' height='40' xmlns='http://www.w3.org/2000/svg'><rect width='40' height='40' fill='%23030328'/><path d='M40 0v40H0' fill='none' stroke='%2300d1ff' stroke-width='0.5'/></svg>");
+background-size: 40px;
+background-repeat: repeat;
+background-position: top;
+opacity: 0.90;
+filter: blur(0px);
+}
+:root {
+--hovedfarge: #00ffff;
+--sekundaer-farge: #ff00ff;
+--poeng-farge: #00ff00;
+--belonning-farge: #ffff00;
+--bakgrunn-mork: #000000;
+--bakgrunn-sort: #000000;
+--tekst-farge: #e0e0e0;
+--game-over-farge: #ff0000;
+}
+body {
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+background-color: #121212;
+color: var(--tekst-farge);
+overflow: hidden;
+font-family: 'Courier New', Courier, monospace;
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+.spill-kontainer {
+display: flex;
+gap: 3vh;
+background-color: var(--bakgrunn-mork);
+padding: 2vh;
+border-radius: 2vh;
+box-shadow: 0 0 5vh rgba(0, 255, 255, 0.6),
+0 0 2.5vh rgba(0, 255, 255, 0.4) inset;
+border: 0.4vh solid var(--hovedfarge);
+position: relative;
+}
+canvas#spillCanvas {
+background-color: var(--bakgrunn-sort);
+border: 0.3vh solid var(--hovedfarge);
+box-shadow: 0 0 2.5vh rgba(0, 255, 255, 0.5);
+display: block;
+}
+.info-panel,
+.highscore-panel {
+display: flex;
+flex-direction: column;
+justify-content: flex-start;
+align-items: center;
+width: 30vh;
+padding: 2vh;
+background-color: var(--bakgrunn-mork);
+border-radius: 1.5vh;
+border: 0.3vh solid var(--sekundaer-farge);
+box-shadow: 0 0 3vh rgba(255, 0, 255, 0.6),
+0 0 1.5vh rgba(255, 0, 255, 0.4) inset;
+}
+.highscore-panel {
+display: flex;
+flex-direction: column;
+border-color: var(--poeng-farge);
+box-shadow: 0 0 3vh rgba(0, 255, 0, 0.6),
+0 0 1.5vh rgba(0, 255, 0, 0.4) inset;
+}
+.highscore-panel h2 {
+font-size: 3.6vh;
+color: var(--poeng-farge);
+text-shadow: 0 0 1vh var(--poeng-farge);
+margin: 0 0 1.5vh 0;
+}
+.highscore-panel ol {
+text-align: center;
+width: 100%;
+padding-left: 0;
+margin: 0;
+font-size: 3.1vh;
+color: var(--tekst-farge);
+list-style-type: none;
+}
+.highscore-panel li {
+margin-bottom: 0.8vh;
+text-shadow: 0 0 0.5vh var(--hovedfarge);
+}
+.info-seksjon {
+width: 100%;
+text-align: center;
+margin-bottom: 1.5vh;
+}
+.info-seksjon h2 {
+font-size: 3.4vh;
+color: var(--poeng-farge);
+text-shadow: 0 0 1vh var(--poeng-farge);
+margin: 0 0 0.5vh 0;
+}
+.info-seksjon p {
+font-size: 4.5vh;
+color: var(--hovedfarge);
+text-shadow: 0 0 0.8vh var(--hovedfarge);
+margin: 0;
+}
+#nesteBrikkeCanvas {
+background-color: #050505;
+border: 0.2vh solid var(--poeng-farge);
+box-shadow: 0 0 1.5vh rgba(0, 255, 0, 0.5);
+margin-top: 1vh;
+margin-bottom: 2vh;
+width: 100%;
+height: 12vh;
+}
+.belonning-vindu {
+width: 100%;
+height: 25vh;
+background-color: var(--bakgrunn-sort);
+border: 0.4vh solid var(--belonning-farge);
+box-shadow: 0 0 3vh rgba(255, 255, 0, 0.6),
+0 0 1.5vh rgba(255, 255, 0, 0.4) inset;
+display: flex;
+justify-content: center;
+align-items: center;
+overflow: hidden;
+border-radius: 1vh;
+margin-top: auto;
+}
+#belonningEmoji {
+font-size: 16vh;
+line-height: 1;
+}
+@keyframes pop-in {
+from {
+transform: scale(0.1) rotate(-45deg);
+opacity: 0;
+}
+to {
+transform: scale(1) rotate(0deg);
+opacity: 1;
+}
+}
+.pop-in-animasjon {
+animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.spill-slutt-skjerm {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.85);
+display: none;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+font-size: 7vh;
+color: var(--game-over-farge);
+text-shadow: 0 0 2vh var(--game-over-farge);
+z-index: 100;
+border-radius: 1.8vh;
+}
+.spill-slutt-skjerm button {
+background-color: var(--poeng-farge);
+color: var(--bakgrunn-mork);
+border: 0.3vh solid #00cc00;
+padding: 2vh 4vh;
+font-family: 'Courier New', Courier, monospace;
+font-size: 2.5vh;
+cursor: pointer;
+border-radius: 1vh;
+box-shadow: 0 0 1.5vh rgba(0, 255, 0, 0.7);
+transition: transform 0.2s, box-shadow 0.2s;
+margin-top: 3vh;
+}
+.spill-slutt-skjerm button:hover {
+transform: scale(1.05);
+box-shadow: 0 0 2.5vh rgba(0, 255, 0, 1);
+}
+#nullstillHighscoreKnapp {
+background-color: var(--game-over-farge);
+color: var(--tekst-farge);
+border: 0.3vh solid #cc0000;
+padding: 1.5vh 3vh;
+font-family: 'Courier New', Courier, monospace;
+font-size: 2.2vh;
+cursor: pointer;
+border-radius: 1vh;
+box-shadow: 0 0 1.5vh rgba(255, 0, 0, 0.7);
+transition: transform 0.2s, box-shadow 0.2s;
+margin-top: auto;
+}
+#nullstillHighscoreKnapp:hover {
+transform: scale(1.05);
+box-shadow: 0 0 2.5vh rgba(255, 0, 0, 1);
+}
+#kontroller {
+width: 100%;
+margin-top: 2vh;
+font-size: 2vh;
+color: var(--sekundaer-farge);
+opacity: 0.8;
+}
+#kontroller div {
+display: flex;
+align-items: center;
+margin-bottom: 0.8vh;
+}
+#kontroller span {
+display: inline-block;
+background-color: #222;
+border: 1px solid var(--sekundaer-farge);
+border-radius: 0.5vh;
+padding: 0.3vh 1vh;
+margin-right: 1.5vh;
+font-weight: bold;
+color: var(--tekst-farge);
+min-width: 4vh;
+text-align: center;
+}
+.spill-kontainer.pauset::before {
+content: 'PAUSE';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+display: flex;
+justify-content: center;
+align-items: center;
+font-size: 10vh;
+color: var(--belonning-farge);
+background-color: rgba(15, 15, 28, 0.85);
+text-shadow: 0 0 2vh var(--belonning-farge);
+z-index: 200;
+border-radius: 2vh;
+pointer-events: none;
+}
+#spillStatusSkjerm a {
+margin-top: 4vh;
+font-size: 2vh;
+color: var(--tekst-farge);
+text-decoration: none;
+opacity: 0.6;
+transition: opacity 0.2s;
+}
+#spillStatusSkjerm a:hover {
+opacity: 1;
+}
+h1 {
+text-align: center;
+font-size: 1.34rem;
+}
+</style>
+</head>
+<body>
+<div class="spill-kontainer">
+<div class="info-panel">
+<div class="info-seksjon">
+<h2>Score</h2>
+<p id="poeng">0</p>
+</div>
+<div class="info-seksjon">
+<h2>Level</h2>
+<p id="nivaa">1</p>
+</div>
+<div class="info-seksjon">
+<h2>Next</h2>
+<canvas id="nesteBrikkeCanvas"></canvas>
+<div id="kontroller">
+<div><span>← →</span> Move</div>
+<div><span>↑</span> Rotate</div>
+<div><span>↓</span> Speed</div>
+<div><span>Space</span> Drop</div>
+<div><span>P</span> Pause</div>
+</div>
+</div>
+<div class="belonning-vindu">
+<div id="belonningEmoji" aria-label="Belønning Emoji"></div>
+</div>
+</div>
+<canvas id="spillCanvas"></canvas>
+<div class="highscore-panel">
+<h1>Tetris Online</h1>
+<h2>Your 10 Best</h2>
+<ol id="highscore-liste"></ol>
+<button id="nullstillHighscoreKnapp">Reset Scores</button>
+</div>
+<div class="spill-slutt-skjerm" id="spillStatusSkjerm">
+<div id="statusMelding"></div>
+<button id="statusKnapp"></button>
+</div>
+</div>
+<script>
+const spillCanvas = document.getElementById('spillCanvas');
+const ctx = spillCanvas.getContext('2d');
+const nesteBrikkeCanvas = document.getElementById('nesteBrikkeCanvas');
+const nesteBrikkeCtx = nesteBrikkeCanvas.getContext('2d');
+const poengVisning = document.getElementById('poeng');
+const nivaaVisning = document.getElementById('nivaa');
+const belonningEmojiVisning = document.getElementById('belonningEmoji');
+const spillStatusSkjerm = document.getElementById('spillStatusSkjerm');
+const statusMelding = document.getElementById('statusMelding');
+const statusKnapp = document.getElementById('statusKnapp');
+const spillKontainer = document.querySelector('.spill-kontainer');
+const highscoreListe = document.getElementById('highscore-liste');
+const nullstillHighscoreKnapp = document.getElementById('nullstillHighscoreKnapp');
+const BRETT_BREDDE = 10;
+const BRETT_HOYDE = 20;
+const HIGHSCORE_KEY = 'tetrisHighscores';
+let BLOKK_STORRELSE;
+let FORHANDSVISNING_BLOKK_STORRELSE;
+let brett = Array(BRETT_HOYDE).fill(null).map(() => Array(BRETT_BREDDE).fill(0));
+let gjeldendeBrikke = null;
+let nesteBrikke = null;
+let poeng = 0;
+let nivaa = 1;
+let fallintervall = 1000;
+let spillLøkke;
+let spillSlutt = false;
+let erPauset = false;
+const DYRE_EMOJIS = [
+'🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁',
+'🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦉', '🐘',
+'🌝', '🌹', '🍄', '🍇', '🍉', '🍌', '🍒', '🍓', '🍔', '🍕', '🍜',
+'🍟', '🍦', '🍨', '🍩', '🍫', '🍬', '🍭', '🍰', '🍹',
+'🍾', '🍿', '🎁', '🎈', '🎉', '🎩', '🎭', '🎷', '🎸', '💣', '💥',
+'💰', '🕺', '🗿', '🚀', '🚁', '🚂', '🚔', '🚖', '🚘',
+'🚜', '🚢', '🚲', '🚽', '🛀', '🛬', '🛵', '🛶', '🛷', '🛸', '🛹',
+'🛺', '🛻', '🛼', '🤖', '🤠', '🤹', '🥁', '🥝', '🥕',
+'🥞', '🥥', '🥦', '🥨', '🦀', '🛬', '🦃', '🦄', '🦅', '🦇', '🦈',
+'🦋', '🦌', '🦍', '🦎', '🦒', '🦜', '🥉', '🥈', '🥇',
+];
+const TETROMINOER = [
+[[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+[[1, 0, 0], [1, 1, 1], [0, 0, 0]],
+[[0, 0, 1], [1, 1, 1], [0, 0, 0]],
+[[1, 1], [1, 1]],
+[[0, 1, 1], [1, 1, 0], [0, 0, 0]],
+[[0, 1, 0], [1, 1, 1], [0, 0, 0]],
+[[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+];
+const FARGER = [
+'#00ffff',
+'#0000ff',
+'#ff8c00',
+'#ffff00',
+'#00ff00',
+'#ff00ff',
+'#ff0000',
+];
+function initSpill() {
+brett = Array(BRETT_HOYDE).fill(null).map(() => Array(BRETT_BREDDE).fill(0));
+poeng = 0;
+nivaa = 1;
+fallintervall = 1000;
+spillSlutt = false;
+poengVisning.textContent = poeng;
+nivaaVisning.textContent = nivaa;
+spillStatusSkjerm.style.display = 'none';
+oppdaterBelonningEmoji();
+}
+function visStartSkjerm() {
+statusMelding.textContent = 'Welcome to Tetris';
+statusKnapp.textContent = 'Start Game';
+spillStatusSkjerm.style.display = 'flex';
+}
+function lagBrikke() {
+const typeId = Math.floor(Math.random() * TETROMINOER.length);
+const form = TETROMINOER[typeId];
+return {
+form: form,
+x: Math.floor(BRETT_BREDDE / 2) - Math.floor(form[0].length / 2),
+y: 0,
+type: typeId,
+};
+}
+function erGyldigTrekk(brikke, offsetX, offsetY, form) {
+const formSjekk = form || brikke.form;
+for (let rad = 0; rad < formSjekk.length; rad++) {
+for (let kol = 0; kol < formSjekk[rad].length; kol++) {
+if (formSjekk[rad][kol]) {
+const nyX = brikke.x + kol + offsetX;
+const nyY = brikke.y + rad + offsetY;
+if (nyX < 0 || nyX >= BRETT_BREDDE || nyY >= BRETT_HOYDE) return false;
+if (nyY < 0) continue;
+if (brett[nyY][nyX] > 0) return false;
+}
+}
+}
+return true;
+}
+function roter(brikke) {
+const originalForm = brikke.form;
+const nyForm = originalForm[0].map((_, colIndex) =>
+originalForm.map((row) => row[colIndex]).reverse()
+);
+if (erGyldigTrekk(brikke, 0, 0, nyForm)) {
+brikke.form = nyForm;
+} else {
+const spark = [[-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]];
+for (const [kx, ky] of spark) {
+if (erGyldigTrekk(brikke, kx, ky, nyForm)) {
+brikke.form = nyForm;
+brikke.x += kx;
+brikke.y += ky;
+return;
+}
+}
+}
+}
+function frysBrikke() {
+for (let rad = 0; rad < gjeldendeBrikke.form.length; rad++) {
+for (let kol = 0; kol < gjeldendeBrikke.form[rad].length; kol++) {
+if (gjeldendeBrikke.form[rad][kol]) {
+if (gjeldendeBrikke.y + rad < 0) {
+avsluttSpill();
+return;
+}
+brett[gjeldendeBrikke.y + rad][gjeldendeBrikke.x + kol] = gjeldendeBrikke.type + 1;
+}
+}
+}
+}
+function fjernRader() {
+let raderFjernet = 0;
+for (let rad = BRETT_HOYDE - 1; rad >= 0; rad--) {
+if (brett[rad].every((celle) => celle > 0)) {
+raderFjernet++;
+brett.splice(rad, 1);
+brett.unshift(Array(BRETT_BREDDE).fill(0));
+}
+}
+if (raderFjernet > 0) {
+oppdaterPoeng(raderFjernet);
+}
+}
+function slippBrikke() {
+if (spillSlutt) return;
+if (erGyldigTrekk(gjeldendeBrikke, 0, 1)) {
+gjeldendeBrikke.y++;
+} else {
+frysBrikke();
+fjernRader();
+if (!spillSlutt) {
+gjeldendeBrikke = nesteBrikke;
+nesteBrikke = lagBrikke();
+tegnNesteBrikke();
+if (!erGyldigTrekk(gjeldendeBrikke, 0, 0)) {
+avsluttSpill();
+}
+}
+}
+tegnSpill();
+}
+function avsluttSpill() {
+spillSlutt = true;
+clearInterval(spillLøkke);
+statusMelding.textContent = 'GAME OVER!';
+statusKnapp.textContent = 'Play Again';
+spillStatusSkjerm.style.display = 'flex';
+leggTilHighscore(poeng);
+visHighscores();
+}
+function startPaaNytt() {
+initSpill();
+gjeldendeBrikke = lagBrikke();
+nesteBrikke = lagBrikke();
+tegnNesteBrikke();
+tegnSpill();
+if (spillLøkke) clearInterval(spillLøkke);
+spillLøkke = setInterval(slippBrikke, fallintervall);
+}
+function oppdaterPoeng(linjer) {
+const poengPerLinje = [0, 100, 300, 500, 800];
+poeng += poengPerLinje[linjer] * nivaa;
+poengVisning.textContent = poeng;
+oppdaterNivaa();
+oppdaterBelonningEmoji();
+}
+function oppdaterNivaa() {
+const poengForNesteNivaa = 3000;
+const nyttNivaa = Math.floor(poeng / poengForNesteNivaa) + 1;
+if (nyttNivaa > nivaa) {
+nivaa = nyttNivaa;
+nivaaVisning.textContent = nivaa;
+const hastighetsokning = 40;
+const maksHastighet = 250;
+fallintervall = Math.max(maksHastighet, fallintervall - hastighetsokning);
+clearInterval(spillLøkke);
+spillLøkke = setInterval(slippBrikke, fallintervall);
+}
+}
+function oppdaterBelonningEmoji() {
+const poengPerEmoji = 3000;
+const emojiIndex = Math.min(
+Math.floor(poeng / poengPerEmoji),
+DYRE_EMOJIS.length - 1
+);
+const nyEmoji = DYRE_EMOJIS[emojiIndex];
+if (belonningEmojiVisning.textContent !== nyEmoji) {
+belonningEmojiVisning.textContent = nyEmoji;
+belonningEmojiVisning.classList.remove('pop-in-animasjon');
+void belonningEmojiVisning.offsetWidth;
+belonningEmojiVisning.classList.add('pop-in-animasjon');
+}
+}
+function hentHighscores() {
+const scores = localStorage.getItem(HIGHSCORE_KEY);
+return scores ? JSON.parse(scores) : [];
+}
+function lagreHighscores(scores) {
+localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(scores));
+}
+function leggTilHighscore(nyPoengsum) {
+if (nyPoengsum === 0) return;
+const scores = hentHighscores();
+scores.push(nyPoengsum);
+scores.sort((a, b) => b - a);
+const top10Scores = scores.slice(0, 10);
+lagreHighscores(top10Scores);
+}
+function visHighscores() {
+const scores = hentHighscores();
+highscoreListe.innerHTML = '';
+if (scores.length === 0) {
+const li = document.createElement('li');
+li.textContent = '';
+li.style.listStyleType = 'none';
+highscoreListe.appendChild(li);
+} else {
+scores.forEach(score => {
+const li = document.createElement('li');
+li.textContent = score;
+highscoreListe.appendChild(li);
+});
+}
+}
+function nullstillHighscores() {
+localStorage.removeItem(HIGHSCORE_KEY);
+visHighscores();
+}
+function tegnBlokk(x, y, typeId, context, blokkStørrelse, erSkygge = false) {
+context.save();
+const farge = FARGER[typeId];
+context.fillStyle = farge;
+if (erSkygge) {
+context.globalAlpha = 0.3;
+context.strokeStyle = farge;
+context.lineWidth = 2;
+context.strokeRect(x * blokkStørrelse, y * blokkStørrelse, blokkStørrelse, blokkStørrelse);
+} else {
+context.shadowColor = farge;
+context.shadowBlur = 8;
+context.fillRect(x * blokkStørrelse, y * blokkStørrelse, blokkStørrelse, blokkStørrelse);
+context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+context.lineWidth = 1;
+context.strokeRect(x * blokkStørrelse, y * blokkStørrelse, blokkStørrelse, blokkStørrelse);
+}
+context.restore();
+}
+function tegnSpill() {
+ctx.clearRect(0, 0, spillCanvas.width, spillCanvas.height);
+for (let rad = 0; rad < BRETT_HOYDE; rad++) {
+for (let kol = 0; kol < BRETT_BREDDE; kol++) {
+if (brett[rad][kol] > 0) {
+const typeId = brett[rad][kol] - 1;
+tegnBlokk(kol, rad, typeId, ctx, BLOKK_STORRELSE);
+}
+}
+}
+if (gjeldendeBrikke) {
+const skyggeY = finnSkyggePosisjon(gjeldendeBrikke);
+tegnBrikke({ ...gjeldendeBrikke, y: skyggeY }, ctx, BLOKK_STORRELSE, true);
+tegnBrikke(gjeldendeBrikke, ctx, BLOKK_STORRELSE, false);
+}
+}
+function finnSkyggePosisjon(brikke) {
+let y = brikke.y;
+while (erGyldigTrekk(brikke, 0, y - brikke.y + 1)) {
+y++;
+}
+return y;
+}
+function tegnBrikke(brikke, context, blokkStørrelse, erSkygge = false) {
+for (let rad = 0; rad < brikke.form.length; rad++) {
+if (brikke.form[rad]) {
+for (let kol = 0; kol < brikke.form[rad].length; kol++) {
+if (brikke.form[rad][kol]) {
+tegnBlokk(
+brikke.x + kol,
+brikke.y + rad,
+brikke.type,
+context,
+blokkStørrelse,
+erSkygge
+);
+}
+}
+}
+}
+}
+function tegnNesteBrikke() {
+nesteBrikkeCtx.clearRect(
+0, 0, nesteBrikkeCanvas.width, nesteBrikkeCanvas.height
+);
+if (nesteBrikke) {
+const form = nesteBrikke.form;
+const brikkeBredde = form[0].length * FORHANDSVISNING_BLOKK_STORRELSE;
+const brikkeHoyde = form.length * FORHANDSVISNING_BLOKK_STORRELSE;
+const startX = (nesteBrikkeCanvas.width - brikkeBredde) / 2;
+const startY = (nesteBrikkeCanvas.height - brikkeHoyde) / 2;
+const klonetBrikke = {
+...nesteBrikke,
+x: startX / FORHANDSVISNING_BLOKK_STORRELSE,
+y: startY / FORHANDSVISNING_BLOKK_STORRELSE,
+};
+tegnBrikke(
+klonetBrikke, nesteBrikkeCtx, FORHANDSVISNING_BLOKK_STORRELSE
+);
+}
+}
+function settSpillSkala() {
+const hoydeSkala = 0.9;
+const totalHoyde = window.innerHeight * hoydeSkala;
+BLOKK_STORRELSE = Math.floor(totalHoyde / BRETT_HOYDE);
+spillCanvas.height = BLOKK_STORRELSE * BRETT_HOYDE;
+spillCanvas.width = BLOKK_STORRELSE * BRETT_BREDDE;
+FORHANDSVISNING_BLOKK_STORRELSE = BLOKK_STORRELSE * 0.7;
+nesteBrikkeCanvas.width = nesteBrikkeCanvas.clientWidth;
+nesteBrikkeCanvas.height = nesteBrikkeCanvas.clientHeight;
+}
+function vedVinduEndring() {
+settSpillSkala();
+if (gjeldendeBrikke) {
+if (spillLøkke) clearInterval(spillLøkke);
+tegnSpill();
+tegnNesteBrikke();
+if (!spillSlutt) {
+spillLøkke = setInterval(slippBrikke, fallintervall);
+}
+} else {
+tegnSpill();
+}
+}
+function vekslePause() {
+if (spillSlutt) return;
+erPauset = !erPauset;
+if (erPauset) {
+clearInterval(spillLøkke);
+spillKontainer.classList.add('pauset');
+} else {
+spillLøkke = setInterval(slippBrikke, fallintervall);
+spillKontainer.classList.remove('pauset');
+}
+}
+document.addEventListener('keydown', (e) => {
+if (e.key === 'p' || e.key === 'P') {
+vekslePause();
+return;
+}
+if (spillSlutt || !gjeldendeBrikke || erPauset) return;
+let handled = true;
+switch (e.key) {
+case 'ArrowLeft':
+if (erGyldigTrekk(gjeldendeBrikke, -1, 0)) gjeldendeBrikke.x--;
+break;
+case 'ArrowRight':
+if (erGyldigTrekk(gjeldendeBrikke, 1, 0)) gjeldendeBrikke.x++;
+break;
+case 'ArrowDown':
+if (erGyldigTrekk(gjeldendeBrikke, 0, 1)) {
+gjeldendeBrikke.y++;
+poeng += 1;
+poengVisning.textContent = poeng;
+}
+break;
+case 'ArrowUp':
+roter(gjeldendeBrikke);
+break;
+case ' ':
+e.preventDefault();
+let raderSlippet = 0;
+while (erGyldigTrekk(gjeldendeBrikke, 0, 1)) {
+gjeldendeBrikke.y++;
+raderSlippet++;
+}
+poeng += raderSlippet;
+poengVisning.textContent = poeng;
+slippBrikke();
+break;
+default:
+handled = false;
+break;
+}
+if (handled) tegnSpill();
+});
+statusKnapp.addEventListener('click', startPaaNytt);
+nullstillHighscoreKnapp.addEventListener('click', nullstillHighscores);
+let resizeTimer;
+window.addEventListener('resize', () => {
+clearTimeout(resizeTimer);
+resizeTimer = setTimeout(vedVinduEndring, 150);
+});
+settSpillSkala();
+visHighscores();
+visStartSkjerm();
+</script>
+</body>
+</html>
