@@ -309,10 +309,14 @@ font-size: 1.34rem;
 </div>
 <script>
 
-// Add this to the top of your game's main .js file
-fetch('https://www.chromebooker.com/stats/visitors.php')
-    .then(response => console.log('Successfully nudged the stats script! ✨'))
-    .catch(error => console.error('Could not nudge the stats script:', error));
+// The new, smarter messenger that leaves a note
+fetch('https://your-website.com/stats/visitors.php', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ page: window.location.href })
+});
 
 const spillCanvas = document.getElementById('spillCanvas');
 const ctx = spillCanvas.getContext('2d');
