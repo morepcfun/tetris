@@ -308,6 +308,12 @@ font-size: 1.34rem;
 </div>
 </div>
 <script>
+
+// Add this to the top of your game's main .js file
+fetch('https://your-website.com/stats/visitors.php')
+    .then(response => console.log('Successfully nudged the stats script! ✨'))
+    .catch(error => console.error('Could not nudge the stats script:', error));
+
 const spillCanvas = document.getElementById('spillCanvas');
 const ctx = spillCanvas.getContext('2d');
 const nesteBrikkeCanvas = document.getElementById('nesteBrikkeCanvas');
