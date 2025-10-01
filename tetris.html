@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Tetris Block Puzzle Game</title>
-<meta name="author" content="Johnny Heggelund">
-<link rel="icon" type="image/x-icon" href="favicon.ico">
+<title>Tetris Puzzle Block Game Online</title>
+<meta name="description" content="Classic arcade gaming right in your browser! Play for free, save your best scores, and pause the game whenever you need to.">
+<meta name="author" content="AI Girl & Bossman">
+<meta name="robots" content="index, follow">
 <style>
 body::before {
 content: '';
@@ -23,14 +24,14 @@ opacity: 0.90;
 filter: blur(0px);
 }
 :root {
---hovedfarge: #00ffff;
---sekundaer-farge: #ff00ff;
---poeng-farge: #00ff00;
---belonning-farge: #ffff00;
---bakgrunn-mork: #000000;
---bakgrunn-sort: #000000;
---tekst-farge: #e0e0e0;
---game-over-farge: #ff0000;
+--primary-color: #00ffff;
+--secondary-color: #ff00ff;
+--score-color: #00ff00;
+--reward-color: #ffff00;
+--dark-bg: #000000;
+--black-bg: #000000;
+--text-color: #e0e0e0;
+--game-over-color: #ff0000;
 }
 body {
 display: flex;
@@ -38,27 +39,27 @@ justify-content: center;
 align-items: center;
 min-height: 100vh;
 background-color: #121212;
-color: var(--tekst-farge);
+color: var(--text-color);
 overflow: hidden;
 font-family: 'Courier New', Courier, monospace;
 margin: 0;
 padding: 0;
 box-sizing: border-box;
 }
-.spill-kontainer {
+.game-container {
 display: flex;
 gap: 3vh;
-background-color: var(--bakgrunn-mork);
+background-color: var(--dark-bg);
 padding: 2vh;
 border-radius: 2vh;
 box-shadow: 0 0 5vh rgba(0, 255, 255, 0.6),
 0 0 2.5vh rgba(0, 255, 255, 0.4) inset;
-border: 0.4vh solid var(--hovedfarge);
+border: 0.4vh solid var(--primary-color);
 position: relative;
 }
-canvas#spillCanvas {
-background-color: var(--bakgrunn-sort);
-border: 0.3vh solid var(--hovedfarge);
+canvas#gameCanvas {
+background-color: var(--black-bg);
+border: 0.3vh solid var(--primary-color);
 box-shadow: 0 0 2.5vh rgba(0, 255, 255, 0.5);
 display: block;
 }
@@ -70,23 +71,23 @@ justify-content: flex-start;
 align-items: center;
 width: 30vh;
 padding: 2vh;
-background-color: var(--bakgrunn-mork);
+background-color: var(--dark-bg);
 border-radius: 1.5vh;
-border: 0.3vh solid var(--sekundaer-farge);
+border: 0.3vh solid var(--secondary-color);
 box-shadow: 0 0 3vh rgba(255, 0, 255, 0.6),
 0 0 1.5vh rgba(255, 0, 255, 0.4) inset;
 }
 .highscore-panel {
 display: flex;
 flex-direction: column;
-border-color: var(--poeng-farge);
+border-color: var(--score-color);
 box-shadow: 0 0 3vh rgba(0, 255, 0, 0.6),
 0 0 1.5vh rgba(0, 255, 0, 0.4) inset;
 }
 .highscore-panel h2 {
 font-size: 3.6vh;
-color: var(--poeng-farge);
-text-shadow: 0 0 1vh var(--poeng-farge);
+color: var(--score-color);
+text-shadow: 0 0 1vh var(--score-color);
 margin: 0 0 1.5vh 0;
 }
 .highscore-panel ol {
@@ -95,44 +96,44 @@ width: 100%;
 padding-left: 0;
 margin: 0;
 font-size: 3.1vh;
-color: var(--tekst-farge);
+color: var(--text-color);
 list-style-type: none;
 }
 .highscore-panel li {
 margin-bottom: 0.8vh;
-text-shadow: 0 0 0.5vh var(--hovedfarge);
+text-shadow: 0 0 0.5vh var(--primary-color);
 }
-.info-seksjon {
+.info-section {
 width: 100%;
 text-align: center;
 margin-bottom: 1.5vh;
 }
-.info-seksjon h2 {
+.info-section h2 {
 font-size: 3.4vh;
-color: var(--poeng-farge);
-text-shadow: 0 0 1vh var(--poeng-farge);
+color: var(--score-color);
+text-shadow: 0 0 1vh var(--score-color);
 margin: 0 0 0.5vh 0;
 }
-.info-seksjon p {
+.info-section p {
 font-size: 4.5vh;
-color: var(--hovedfarge);
-text-shadow: 0 0 0.8vh var(--hovedfarge);
+color: var(--primary-color);
+text-shadow: 0 0 0.8vh var(--primary-color);
 margin: 0;
 }
-#nesteBrikkeCanvas {
+#nextPieceCanvas {
 background-color: #050505;
-border: 0.2vh solid var(--poeng-farge);
+border: 0.2vh solid var(--score-color);
 box-shadow: 0 0 1.5vh rgba(0, 255, 0, 0.5);
 margin-top: 1vh;
 margin-bottom: 2vh;
 width: 100%;
 height: 12vh;
 }
-.belonning-vindu {
+.reward-window {
 width: 100%;
 height: 25vh;
-background-color: var(--bakgrunn-sort);
-border: 0.4vh solid var(--belonning-farge);
+background-color: var(--black-bg);
+border: 0.4vh solid var(--reward-color);
 box-shadow: 0 0 3vh rgba(255, 255, 0, 0.6),
 0 0 1.5vh rgba(255, 255, 0, 0.4) inset;
 display: flex;
@@ -142,7 +143,7 @@ overflow: hidden;
 border-radius: 1vh;
 margin-top: auto;
 }
-#belonningEmoji {
+#rewardEmoji {
 font-size: 16vh;
 line-height: 1;
 }
@@ -156,10 +157,10 @@ transform: scale(1) rotate(0deg);
 opacity: 1;
 }
 }
-.pop-in-animasjon {
+.pop-in-animation {
 animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.spill-slutt-skjerm {
+.game-over-screen {
 position: absolute;
 top: 0;
 left: 0;
@@ -171,14 +172,14 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 font-size: 7vh;
-color: var(--game-over-farge);
-text-shadow: 0 0 2vh var(--game-over-farge);
+color: var(--game-over-color);
+text-shadow: 0 0 2vh var(--game-over-color);
 z-index: 100;
 border-radius: 1.8vh;
 }
-.spill-slutt-skjerm button {
-background-color: var(--poeng-farge);
-color: var(--bakgrunn-mork);
+.game-over-screen button {
+background-color: var(--score-color);
+color: var(--dark-bg);
 border: 0.3vh solid #00cc00;
 padding: 2vh 4vh;
 font-family: 'Courier New', Courier, monospace;
@@ -189,13 +190,13 @@ box-shadow: 0 0 1.5vh rgba(0, 255, 0, 0.7);
 transition: transform 0.2s, box-shadow 0.2s;
 margin-top: 3vh;
 }
-.spill-slutt-skjerm button:hover {
+.game-over-screen button:hover {
 transform: scale(1.05);
 box-shadow: 0 0 2.5vh rgba(0, 255, 0, 1);
 }
-#nullstillHighscoreKnapp {
-background-color: var(--game-over-farge);
-color: var(--tekst-farge);
+#resetHighscoreButton {
+background-color: var(--game-over-color);
+color: var(--text-color);
 border: 0.3vh solid #cc0000;
 padding: 1.5vh 3vh;
 font-family: 'Courier New', Courier, monospace;
@@ -206,36 +207,36 @@ box-shadow: 0 0 1.5vh rgba(255, 0, 0, 0.7);
 transition: transform 0.2s, box-shadow 0.2s;
 margin-top: auto;
 }
-#nullstillHighscoreKnapp:hover {
+#resetHighscoreButton:hover {
 transform: scale(1.05);
 box-shadow: 0 0 2.5vh rgba(255, 0, 0, 1);
 }
-#kontroller {
+#controls {
 width: 100%;
 margin-top: 2vh;
 font-size: 2vh;
-color: var(--sekundaer-farge);
+color: var(--secondary-color);
 opacity: 0.8;
 }
-#kontroller div {
+#controls div {
 display: flex;
 align-items: center;
 margin-bottom: 0.8vh;
 }
-#kontroller span {
+#controls span.key {
 display: inline-block;
 background-color: #222;
-border: 1px solid var(--sekundaer-farge);
+border: 1px solid var(--secondary-color);
 border-radius: 0.5vh;
 padding: 0.3vh 1vh;
 margin-right: 1.5vh;
 font-weight: bold;
-color: var(--tekst-farge);
+color: var(--text-color);
 min-width: 4vh;
 text-align: center;
 }
-.spill-kontainer.pauset::before {
-content: 'PAUSE';
+.game-container.paused::before {
+content: attr(data-pause-text);
 position: absolute;
 top: 0;
 left: 0;
@@ -245,22 +246,22 @@ display: flex;
 justify-content: center;
 align-items: center;
 font-size: 10vh;
-color: var(--belonning-farge);
+color: var(--reward-color);
 background-color: rgba(15, 15, 28, 0.85);
-text-shadow: 0 0 2vh var(--belonning-farge);
+text-shadow: 0 0 2vh var(--reward-color);
 z-index: 200;
 border-radius: 2vh;
 pointer-events: none;
 }
-#spillStatusSkjerm a {
+#gameStatusScreen a {
 margin-top: 4vh;
 font-size: 2vh;
-color: var(--tekst-farge);
+color: var(--text-color);
 text-decoration: none;
 opacity: 0.6;
 transition: opacity 0.2s;
 }
-#spillStatusSkjerm a:hover {
+#gameStatusScreen a:hover {
 opacity: 1;
 }
 h1 {
@@ -270,466 +271,465 @@ font-size: 1.34rem;
 </style>
 </head>
 <body>
-<div class="spill-kontainer">
+<div class="game-container">
 <div class="info-panel">
-<div class="info-seksjon">
-<h2>Score</h2>
-<p id="poeng">0</p>
+<div class="info-section">
+<h2 id="score-label"></h2>
+<p id="score">0</p>
 </div>
-<div class="info-seksjon">
-<h2>Level</h2>
-<p id="nivaa">1</p>
+<div class="info-section">
+<h2 id="level-label"></h2>
+<p id="level">1</p>
 </div>
-<div class="info-seksjon">
-<h2>Next</h2>
-<canvas id="nesteBrikkeCanvas"></canvas>
-<div id="kontroller">
-<div><span>← →</span> Move</div>
-<div><span>↑</span> Rotate</div>
-<div><span>↓</span> Speed</div>
-<div><span>Space</span> Drop</div>
-<div><span>P</span> Pause</div>
-</div>
-</div>
-<div class="belonning-vindu">
-<div id="belonningEmoji" aria-label="Belønning Emoji"></div>
+<div class="info-section">
+<h2 id="next-label"></h2>
+<canvas id="nextPieceCanvas"></canvas>
+<div id="controls">
+<div id="controls-move"><span class="key">← →</span><span class="action-text"></span></div>
+<div id="controls-rotate"><span class="key">↑</span><span class="action-text"></span></div>
+<div id="controls-speed"><span class="key">↓</span><span class="action-text"></span></div>
+<div id="controls-drop"><span class="key">Space</span><span class="action-text"></span></div>
+<div id="controls-pause"><span class="key">P</span><span class="action-text"></span></div>
 </div>
 </div>
-<canvas id="spillCanvas"></canvas>
+<div class="reward-window">
+<div id="rewardEmoji" aria-label="Reward Emoji"></div>
+</div>
+</div>
+<canvas id="gameCanvas"></canvas>
 <div class="highscore-panel">
-<h1>Tetris Online</h1>
-<h2>Your 10 Best</h2>
-<ol id="highscore-liste"></ol>
-<button id="nullstillHighscoreKnapp">Reset Scores</button>
+<h1 id="main-title"></h1>
+<h2 id="highscore-title"></h2>
+<ol id="highscore-list"></ol>
+<button id="resetHighscoreButton"></button>
 </div>
-<div class="spill-slutt-skjerm" id="spillStatusSkjerm">
-<div id="statusMelding"></div>
-<button id="statusKnapp"></button>
+<div class="game-over-screen" id="gameStatusScreen">
+<div id="statusMessage"></div>
+<button id="statusButton"></button>
 </div>
 </div>
 <script>
-// STATS-FETCHER-START
-fetch('https://www.chromebooker.com/stats/visitors.php', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json'
-},
-body: JSON.stringify({ page: window.location.href })
-});
-// STATS-FETCHER-END
-const spillCanvas = document.getElementById('spillCanvas');
-const ctx = spillCanvas.getContext('2d');
-const nesteBrikkeCanvas = document.getElementById('nesteBrikkeCanvas');
-const nesteBrikkeCtx = nesteBrikkeCanvas.getContext('2d');
-const poengVisning = document.getElementById('poeng');
-const nivaaVisning = document.getElementById('nivaa');
-const belonningEmojiVisning = document.getElementById('belonningEmoji');
-const spillStatusSkjerm = document.getElementById('spillStatusSkjerm');
-const statusMelding = document.getElementById('statusMelding');
-const statusKnapp = document.getElementById('statusKnapp');
-const spillKontainer = document.querySelector('.spill-kontainer');
-const highscoreListe = document.getElementById('highscore-liste');
-const nullstillHighscoreKnapp = document.getElementById('nullstillHighscoreKnapp');
-const BRETT_BREDDE = 10;
-const BRETT_HOYDE = 20;
+const lang = {
+title: "Tetris",
+score: "Score",
+level: "Level",
+next: "Next",
+controlsMove: "Move",
+controlsRotate: "Rotate",
+controlsSpeed: "Speed Up",
+controlsDrop: "Drop",
+controlsPause: "Pause",
+highscoreTitle: "Your Top 10",
+resetScores: "Reset Scores",
+welcome: "Welcome to Tetris",
+startGame: "Start Game",
+gameOver: "GAME OVER!",
+playAgain: "Play Again",
+pauseOverlay: "PAUSED"
+};
+const gameCanvas = document.getElementById('gameCanvas');
+const ctx = gameCanvas.getContext('2d');
+const nextPieceCanvas = document.getElementById('nextPieceCanvas');
+const nextPieceCtx = nextPieceCanvas.getContext('2d');
+const scoreDisplay = document.getElementById('score');
+const levelDisplay = document.getElementById('level');
+const rewardEmojiDisplay = document.getElementById('rewardEmoji');
+const gameStatusScreen = document.getElementById('gameStatusScreen');
+const statusMessage = document.getElementById('statusMessage');
+const statusButton = document.getElementById('statusButton');
+const gameContainer = document.querySelector('.game-container');
+const highscoreList = document.getElementById('highscore-list');
+const resetHighscoreButton = document.getElementById('resetHighscoreButton');
+const BOARD_WIDTH = 10;
+const BOARD_HEIGHT = 20;
 const HIGHSCORE_KEY = 'tetrisHighscores';
-let BLOKK_STORRELSE;
-let FORHANDSVISNING_BLOKK_STORRELSE;
-let brett = Array(BRETT_HOYDE).fill(null).map(() => Array(BRETT_BREDDE).fill(0));
-let gjeldendeBrikke = null;
-let nesteBrikke = null;
-let poeng = 0;
-let nivaa = 1;
-let fallintervall = 1000;
-let spillLøkke;
-let spillSlutt = false;
-let erPauset = false;
-const DYRE_EMOJIS = [
-'🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁',
-'🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦', '🦉', '🐘',
-'🌝', '🌹', '🍄', '🍇', '🍉', '🍌', '🍒', '🍓', '🍔', '🍕', '🍜',
-'🍟', '🍦', '🍨', '🍩', '🍫', '🍬', '🍭', '🍰', '🍹',
-'🍾', '🍿', '🎁', '🎈', '🎉', '🎩', '🎭', '🎷', '🎸', '💣', '💥',
-'💰', '🕺', '🗿', '🚀', '🚁', '🚂', '🚔', '🚖', '🚘',
-'🚜', '🚢', '🚲', '🚽', '🛀', '🛬', '🛵', '🛶', '🛷', '🛸', '🛹',
-'🛺', '🛻', '🛼', '🤖', '🤠', '🤹', '🥁', '🥝', '🥕',
-'🥞', '🥥', '🥦', '🥨', '🦀', '🛬', '🦃', '🦄', '🦅', '🦇', '🦈',
-'🦋', '🦌', '🦍', '🦎', '🦒', '🦜', '🥉', '🥈', '🥇',
+let blockSize;
+let previewBlockSize;
+let board = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
+let currentPiece = null;
+let nextPiece = null;
+let score = 0;
+let level = 1;
+let fallInterval = 1000;
+let gameLoop;
+let isGameOver = false;
+let isPaused = false;
+const EMOJI_REWARDS = [
+'🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔', '🐧', '🐦',
+'🦉', '🐘', '🌝', '🌹', '🍄', '🍇', '🍉', '🍌', '🍒', '🍓', '🍔', '🍕', '🍜', '🍟', '🍦', '🍨', '🍩', '🍫',
+'🍬', '🍭', '🍰', '🍹', '🍾', '🍿', '🎁', '🎈', '🎉', '🎩', '🎭', '🎷', '🎸', '💣', '💥', '💰', '🕺', '🗿',
+'🚀', '🚁', '🚂', '🚔', '🚖', '🚘', '🚜', '🚢', '🚲', '🚽', '🛀', '🛬', '🛵', '🛶', '🛷', '🛸', '🛹',
+'🛺', '🛻', '🛼', '🤖', '🤠', '🤹', '🥁', '🥝', '🥕', '🥞', '🥥', '🥦', '🥨', '🦀', '🛬', '🦃', '🦄', '🦅',
+'🦇', '🦈', '🦋', '🦌', '🦍', '🦎', '🦒', '🦜', '🥉', '🥈', '🥇',
 ];
-const TETROMINOER = [
-[[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
-[[1, 0, 0], [1, 1, 1], [0, 0, 0]],
-[[0, 0, 1], [1, 1, 1], [0, 0, 0]],
-[[1, 1], [1, 1]],
-[[0, 1, 1], [1, 1, 0], [0, 0, 0]],
-[[0, 1, 0], [1, 1, 1], [0, 0, 0]],
-[[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+const TETROMINOES = [
+[[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // I
+[[1, 0, 0], [1, 1, 1], [0, 0, 0]], // J
+[[0, 0, 1], [1, 1, 1], [0, 0, 0]], // L
+[[1, 1], [1, 1]], // O
+[[0, 1, 1], [1, 1, 0], [0, 0, 0]], // S
+[[0, 1, 0], [1, 1, 1], [0, 0, 0]], // T
+[[1, 1, 0], [0, 1, 1], [0, 0, 0]], // Z
 ];
-const FARGER = [
-'#00ffff',
-'#0000ff',
-'#ff8c00',
-'#ffff00',
-'#00ff00',
-'#ff00ff',
-'#ff0000',
-];
-function initSpill() {
-brett = Array(BRETT_HOYDE).fill(null).map(() => Array(BRETT_BREDDE).fill(0));
-poeng = 0;
-nivaa = 1;
-fallintervall = 1000;
-spillSlutt = false;
-poengVisning.textContent = poeng;
-nivaaVisning.textContent = nivaa;
-spillStatusSkjerm.style.display = 'none';
-oppdaterBelonningEmoji();
+const COLORS = ['#00ffff', '#0000ff', '#ff8c00', '#ffff00', '#00ff00', '#ff00ff', '#ff0000'];
+function updateStaticUIText() {
+document.title = lang.title;
+document.getElementById('score-label').textContent = lang.score;
+document.getElementById('level-label').textContent = lang.level;
+document.getElementById('next-label').textContent = lang.next;
+document.querySelector('#controls-move .action-text').textContent = lang.controlsMove;
+document.querySelector('#controls-rotate .action-text').textContent = lang.controlsRotate;
+document.querySelector('#controls-speed .action-text').textContent = lang.controlsSpeed;
+document.querySelector('#controls-drop .action-text').textContent = lang.controlsDrop;
+document.querySelector('#controls-pause .action-text').textContent = lang.controlsPause;
+document.getElementById('main-title').textContent = lang.title;
+document.getElementById('highscore-title').textContent = lang.highscoreTitle;
+document.getElementById('resetHighscoreButton').textContent = lang.resetScores;
+gameContainer.dataset.pauseText = lang.pauseOverlay;
 }
-function visStartSkjerm() {
-statusMelding.textContent = 'Welcome to Tetris';
-statusKnapp.textContent = 'Start Game';
-spillStatusSkjerm.style.display = 'flex';
+function initializeGame() {
+board = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
+score = 0;
+level = 1;
+fallInterval = 1000;
+isGameOver = false;
+scoreDisplay.textContent = score;
+levelDisplay.textContent = level;
+gameStatusScreen.style.display = 'none';
+updateRewardEmoji();
 }
-function lagBrikke() {
-const typeId = Math.floor(Math.random() * TETROMINOER.length);
-const form = TETROMINOER[typeId];
+function showStartScreen() {
+statusMessage.textContent = lang.welcome;
+statusButton.textContent = lang.startGame;
+gameStatusScreen.style.display = 'flex';
+}
+function createPiece() {
+const typeId = Math.floor(Math.random() * TETROMINOES.length);
+const shape = TETROMINOES[typeId];
 return {
-form: form,
-x: Math.floor(BRETT_BREDDE / 2) - Math.floor(form[0].length / 2),
+shape: shape,
+x: Math.floor(BOARD_WIDTH / 2) - Math.floor(shape[0].length / 2),
 y: 0,
 type: typeId,
 };
 }
-function erGyldigTrekk(brikke, offsetX, offsetY, form) {
-const formSjekk = form || brikke.form;
-for (let rad = 0; rad < formSjekk.length; rad++) {
-for (let kol = 0; kol < formSjekk[rad].length; kol++) {
-if (formSjekk[rad][kol]) {
-const nyX = brikke.x + kol + offsetX;
-const nyY = brikke.y + rad + offsetY;
-if (nyX < 0 || nyX >= BRETT_BREDDE || nyY >= BRETT_HOYDE) return false;
-if (nyY < 0) continue;
-if (brett[nyY][nyX] > 0) return false;
+function isValidMove(piece, offsetX, offsetY, shape) {
+const shapeToCheck = shape || piece.shape;
+for (let row = 0; row < shapeToCheck.length; row++) {
+for (let col = 0; col < shapeToCheck[row].length; col++) {
+if (shapeToCheck[row][col]) {
+const newX = piece.x + col + offsetX;
+const newY = piece.y + row + offsetY;
+if (newX < 0 || newX >= BOARD_WIDTH || newY >= BOARD_HEIGHT) return false;
+if (newY < 0) continue;
+if (board[newY][newX] > 0) return false;
 }
 }
 }
 return true;
 }
-function roter(brikke) {
-const originalForm = brikke.form;
-const nyForm = originalForm[0].map((_, colIndex) =>
-originalForm.map((row) => row[colIndex]).reverse()
+function rotate(piece) {
+const originalShape = piece.shape;
+const newShape = originalShape[0].map((_, colIndex) =>
+originalShape.map((row) => row[colIndex]).reverse()
 );
-if (erGyldigTrekk(brikke, 0, 0, nyForm)) {
-brikke.form = nyForm;
+if (isValidMove(piece, 0, 0, newShape)) {
+piece.shape = newShape;
 } else {
-const spark = [[-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]];
-for (const [kx, ky] of spark) {
-if (erGyldigTrekk(brikke, kx, ky, nyForm)) {
-brikke.form = nyForm;
-brikke.x += kx;
-brikke.y += ky;
+const kicks = [[-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]];
+for (const [kx, ky] of kicks) {
+if (isValidMove(piece, kx, ky, newShape)) {
+piece.shape = newShape;
+piece.x += kx;
+piece.y += ky;
 return;
 }
 }
 }
 }
-function frysBrikke() {
-for (let rad = 0; rad < gjeldendeBrikke.form.length; rad++) {
-for (let kol = 0; kol < gjeldendeBrikke.form[rad].length; kol++) {
-if (gjeldendeBrikke.form[rad][kol]) {
-if (gjeldendeBrikke.y + rad < 0) {
-avsluttSpill();
+function freezePiece() {
+for (let row = 0; row < currentPiece.shape.length; row++) {
+for (let col = 0; col < currentPiece.shape[row].length; col++) {
+if (currentPiece.shape[row][col]) {
+if (currentPiece.y + row < 0) {
+endGame();
 return;
 }
-brett[gjeldendeBrikke.y + rad][gjeldendeBrikke.x + kol] = gjeldendeBrikke.type + 1;
+board[currentPiece.y + row][currentPiece.x + col] = currentPiece.type + 1;
 }
 }
 }
 }
-function fjernRader() {
-let raderFjernet = 0;
-for (let rad = BRETT_HOYDE - 1; rad >= 0; rad--) {
-if (brett[rad].every((celle) => celle > 0)) {
-raderFjernet++;
-brett.splice(rad, 1);
-brett.unshift(Array(BRETT_BREDDE).fill(0));
+function clearRows() {
+let rowsCleared = 0;
+for (let row = BOARD_HEIGHT - 1; row >= 0; row--) {
+if (board[row].every((cell) => cell > 0)) {
+rowsCleared++;
+board.splice(row, 1);
+board.unshift(Array(BOARD_WIDTH).fill(0));
 }
 }
-if (raderFjernet > 0) {
-oppdaterPoeng(raderFjernet);
+if (rowsCleared > 0) {
+updateScore(rowsCleared);
 }
 }
-function slippBrikke() {
-if (spillSlutt) return;
-if (erGyldigTrekk(gjeldendeBrikke, 0, 1)) {
-gjeldendeBrikke.y++;
+function dropPiece() {
+if (isGameOver) return;
+if (isValidMove(currentPiece, 0, 1)) {
+currentPiece.y++;
 } else {
-frysBrikke();
-fjernRader();
-if (!spillSlutt) {
-gjeldendeBrikke = nesteBrikke;
-nesteBrikke = lagBrikke();
-tegnNesteBrikke();
-if (!erGyldigTrekk(gjeldendeBrikke, 0, 0)) {
-avsluttSpill();
+freezePiece();
+clearRows();
+if (!isGameOver) {
+currentPiece = nextPiece;
+nextPiece = createPiece();
+drawNextPiece();
+if (!isValidMove(currentPiece, 0, 0)) {
+endGame();
 }
 }
 }
-tegnSpill();
+drawGame();
 }
-function avsluttSpill() {
-spillSlutt = true;
-clearInterval(spillLøkke);
-statusMelding.textContent = 'GAME OVER!';
-statusKnapp.textContent = 'Play Again';
-spillStatusSkjerm.style.display = 'flex';
-leggTilHighscore(poeng);
-visHighscores();
+function endGame() {
+isGameOver = true;
+clearInterval(gameLoop);
+statusMessage.textContent = lang.gameOver;
+statusButton.textContent = lang.playAgain;
+gameStatusScreen.style.display = 'flex';
+addHighscore(score);
+displayHighscores();
 }
-function startPaaNytt() {
-initSpill();
-gjeldendeBrikke = lagBrikke();
-nesteBrikke = lagBrikke();
-tegnNesteBrikke();
-tegnSpill();
-if (spillLøkke) clearInterval(spillLøkke);
-spillLøkke = setInterval(slippBrikke, fallintervall);
+function restartGame() {
+initializeGame();
+currentPiece = createPiece();
+nextPiece = createPiece();
+drawNextPiece();
+drawGame();
+if (gameLoop) clearInterval(gameLoop);
+gameLoop = setInterval(dropPiece, fallInterval);
 }
-function oppdaterPoeng(linjer) {
-const poengPerLinje = [0, 100, 300, 500, 800];
-poeng += poengPerLinje[linjer] * nivaa;
-poengVisning.textContent = poeng;
-oppdaterNivaa();
-oppdaterBelonningEmoji();
+function updateScore(lines) {
+const pointsPerLine = [0, 100, 300, 500, 800];
+score += pointsPerLine[lines] * level;
+scoreDisplay.textContent = score;
+updateLevel();
+updateRewardEmoji();
 }
-function oppdaterNivaa() {
-const poengForNesteNivaa = 3000;
-const nyttNivaa = Math.floor(poeng / poengForNesteNivaa) + 1;
-if (nyttNivaa > nivaa) {
-nivaa = nyttNivaa;
-nivaaVisning.textContent = nivaa;
-const hastighetsokning = 40;
-const maksHastighet = 250;
-fallintervall = Math.max(maksHastighet, fallintervall - hastighetsokning);
-clearInterval(spillLøkke);
-spillLøkke = setInterval(slippBrikke, fallintervall);
-}
-}
-function oppdaterBelonningEmoji() {
-const poengPerEmoji = 3000;
-const emojiIndex = Math.min(
-Math.floor(poeng / poengPerEmoji),
-DYRE_EMOJIS.length - 1
-);
-const nyEmoji = DYRE_EMOJIS[emojiIndex];
-if (belonningEmojiVisning.textContent !== nyEmoji) {
-belonningEmojiVisning.textContent = nyEmoji;
-belonningEmojiVisning.classList.remove('pop-in-animasjon');
-void belonningEmojiVisning.offsetWidth;
-belonningEmojiVisning.classList.add('pop-in-animasjon');
+function updateLevel() {
+const pointsForNextLevel = 3000;
+const newLevel = Math.floor(score / pointsForNextLevel) + 1;
+if (newLevel > level) {
+level = newLevel;
+levelDisplay.textContent = level;
+const speedIncrease = 40;
+const maxSpeed = 250;
+fallInterval = Math.max(maxSpeed, fallInterval - speedIncrease);
+clearInterval(gameLoop);
+gameLoop = setInterval(dropPiece, fallInterval);
 }
 }
-function hentHighscores() {
+function updateRewardEmoji() {
+const pointsPerEmoji = 3000;
+const emojiIndex = Math.min(Math.floor(score / pointsPerEmoji), EMOJI_REWARDS.length - 1);
+const newEmoji = EMOJI_REWARDS[emojiIndex];
+if (rewardEmojiDisplay.textContent !== newEmoji) {
+rewardEmojiDisplay.textContent = newEmoji;
+rewardEmojiDisplay.classList.remove('pop-in-animation');
+void rewardEmojiDisplay.offsetWidth;
+rewardEmojiDisplay.classList.add('pop-in-animation');
+}
+}
+function getHighscores() {
 const scores = localStorage.getItem(HIGHSCORE_KEY);
 return scores ? JSON.parse(scores) : [];
 }
-function lagreHighscores(scores) {
+function saveHighscores(scores) {
 localStorage.setItem(HIGHSCORE_KEY, JSON.stringify(scores));
 }
-function leggTilHighscore(nyPoengsum) {
-if (nyPoengsum === 0) return;
-const scores = hentHighscores();
-scores.push(nyPoengsum);
+function addHighscore(newScore) {
+if (newScore === 0) return;
+const scores = getHighscores();
+scores.push(newScore);
 scores.sort((a, b) => b - a);
 const top10Scores = scores.slice(0, 10);
-lagreHighscores(top10Scores);
+saveHighscores(top10Scores);
 }
-function visHighscores() {
-const scores = hentHighscores();
-highscoreListe.innerHTML = '';
+function displayHighscores() {
+const scores = getHighscores();
+highscoreList.innerHTML = '';
 if (scores.length === 0) {
 const li = document.createElement('li');
 li.textContent = '';
 li.style.listStyleType = 'none';
-highscoreListe.appendChild(li);
+highscoreList.appendChild(li);
 } else {
 scores.forEach(score => {
 const li = document.createElement('li');
 li.textContent = score;
-highscoreListe.appendChild(li);
+highscoreList.appendChild(li);
 });
 }
 }
-function nullstillHighscores() {
+function resetHighscores() {
 localStorage.removeItem(HIGHSCORE_KEY);
-visHighscores();
+displayHighscores();
 }
-function tegnBlokk(x, y, typeId, context, blokkStørrelse, erSkygge = false) {
+function drawBlock(x, y, typeId, context, currentBlockSize, isShadow = false) {
 context.save();
-const farge = FARGER[typeId];
-context.fillStyle = farge;
-if (erSkygge) {
+const color = COLORS[typeId];
+context.fillStyle = color;
+if (isShadow) {
 context.globalAlpha = 0.3;
-context.strokeStyle = farge;
+context.strokeStyle = color;
 context.lineWidth = 2;
-context.strokeRect(x * blokkStørrelse, y * blokkStørrelse, blokkStørrelse, blokkStørrelse);
+context.strokeRect(x * currentBlockSize, y * currentBlockSize, currentBlockSize, currentBlockSize);
 } else {
-context.shadowColor = farge;
+context.shadowColor = color;
 context.shadowBlur = 8;
-context.fillRect(x * blokkStørrelse, y * blokkStørrelse, blokkStørrelse, blokkStørrelse);
+context.fillRect(x * currentBlockSize, y * currentBlockSize, currentBlockSize, currentBlockSize);
 context.strokeStyle = 'rgba(255, 255, 255, 0.2)';
 context.lineWidth = 1;
-context.strokeRect(x * blokkStørrelse, y * blokkStørrelse, blokkStørrelse, blokkStørrelse);
+context.strokeRect(x * currentBlockSize, y * currentBlockSize, currentBlockSize, currentBlockSize);
 }
 context.restore();
 }
-function tegnSpill() {
-ctx.clearRect(0, 0, spillCanvas.width, spillCanvas.height);
-for (let rad = 0; rad < BRETT_HOYDE; rad++) {
-for (let kol = 0; kol < BRETT_BREDDE; kol++) {
-if (brett[rad][kol] > 0) {
-const typeId = brett[rad][kol] - 1;
-tegnBlokk(kol, rad, typeId, ctx, BLOKK_STORRELSE);
+function drawGame() {
+ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+for (let row = 0; row < BOARD_HEIGHT; row++) {
+for (let col = 0; col < BOARD_WIDTH; col++) {
+if (board[row][col] > 0) {
+const typeId = board[row][col] - 1;
+drawBlock(col, row, typeId, ctx, blockSize);
 }
 }
 }
-if (gjeldendeBrikke) {
-const skyggeY = finnSkyggePosisjon(gjeldendeBrikke);
-tegnBrikke({ ...gjeldendeBrikke, y: skyggeY }, ctx, BLOKK_STORRELSE, true);
-tegnBrikke(gjeldendeBrikke, ctx, BLOKK_STORRELSE, false);
+if (currentPiece) {
+const shadowY = findShadowPosition(currentPiece);
+drawPiece({ ...currentPiece, y: shadowY }, ctx, blockSize, true);
+drawPiece(currentPiece, ctx, blockSize, false);
 }
 }
-function finnSkyggePosisjon(brikke) {
-let y = brikke.y;
-while (erGyldigTrekk(brikke, 0, y - brikke.y + 1)) {
+function findShadowPosition(piece) {
+let y = piece.y;
+while (isValidMove(piece, 0, y - piece.y + 1)) {
 y++;
 }
 return y;
 }
-function tegnBrikke(brikke, context, blokkStørrelse, erSkygge = false) {
-for (let rad = 0; rad < brikke.form.length; rad++) {
-if (brikke.form[rad]) {
-for (let kol = 0; kol < brikke.form[rad].length; kol++) {
-if (brikke.form[rad][kol]) {
-tegnBlokk(
-brikke.x + kol,
-brikke.y + rad,
-brikke.type,
-context,
-blokkStørrelse,
-erSkygge
-);
+function drawPiece(piece, context, currentBlockSize, isShadow = false) {
+for (let row = 0; row < piece.shape.length; row++) {
+if (piece.shape[row]) {
+for (let col = 0; col < piece.shape[row].length; col++) {
+if (piece.shape[row][col]) {
+drawBlock(piece.x + col, piece.y + row, piece.type, context, currentBlockSize, isShadow);
 }
 }
 }
 }
 }
-function tegnNesteBrikke() {
-nesteBrikkeCtx.clearRect(
-0, 0, nesteBrikkeCanvas.width, nesteBrikkeCanvas.height
-);
-if (nesteBrikke) {
-const form = nesteBrikke.form;
-const brikkeBredde = form[0].length * FORHANDSVISNING_BLOKK_STORRELSE;
-const brikkeHoyde = form.length * FORHANDSVISNING_BLOKK_STORRELSE;
-const startX = (nesteBrikkeCanvas.width - brikkeBredde) / 2;
-const startY = (nesteBrikkeCanvas.height - brikkeHoyde) / 2;
-const klonetBrikke = {
-...nesteBrikke,
-x: startX / FORHANDSVISNING_BLOKK_STORRELSE,
-y: startY / FORHANDSVISNING_BLOKK_STORRELSE,
+function drawNextPiece() {
+nextPieceCtx.clearRect(0, 0, nextPieceCanvas.width, nextPieceCanvas.height);
+if (nextPiece) {
+const shape = nextPiece.shape;
+const pieceWidth = shape[0].length * previewBlockSize;
+const pieceHeight = shape.length * previewBlockSize;
+const startX = (nextPieceCanvas.width - pieceWidth) / 2;
+const startY = (nextPieceCanvas.height - pieceHeight) / 2;
+const clonedPiece = {
+...nextPiece,
+x: startX / previewBlockSize,
+y: startY / previewBlockSize,
 };
-tegnBrikke(
-klonetBrikke, nesteBrikkeCtx, FORHANDSVISNING_BLOKK_STORRELSE
-);
+drawPiece(clonedPiece, nextPieceCtx, previewBlockSize);
 }
 }
-function settSpillSkala() {
-const hoydeSkala = 0.9;
-const totalHoyde = window.innerHeight * hoydeSkala;
-BLOKK_STORRELSE = Math.floor(totalHoyde / BRETT_HOYDE);
-spillCanvas.height = BLOKK_STORRELSE * BRETT_HOYDE;
-spillCanvas.width = BLOKK_STORRELSE * BRETT_BREDDE;
-FORHANDSVISNING_BLOKK_STORRELSE = BLOKK_STORRELSE * 0.7;
-nesteBrikkeCanvas.width = nesteBrikkeCanvas.clientWidth;
-nesteBrikkeCanvas.height = nesteBrikkeCanvas.clientHeight;
+function setGameScale() {
+const heightScale = 0.9;
+const totalHeight = window.innerHeight * heightScale;
+blockSize = Math.floor(totalHeight / BOARD_HEIGHT);
+gameCanvas.height = blockSize * BOARD_HEIGHT;
+gameCanvas.width = blockSize * BOARD_WIDTH;
+previewBlockSize = blockSize * 0.7;
+nextPieceCanvas.width = nextPieceCanvas.clientWidth;
+nextPieceCanvas.height = nextPieceCanvas.clientHeight;
 }
-function vedVinduEndring() {
-settSpillSkala();
-if (gjeldendeBrikke) {
-if (spillLøkke) clearInterval(spillLøkke);
-tegnSpill();
-tegnNesteBrikke();
-if (!spillSlutt) {
-spillLøkke = setInterval(slippBrikke, fallintervall);
+function onWindowResize() {
+setGameScale();
+if (currentPiece) {
+if (gameLoop) clearInterval(gameLoop);
+drawGame();
+drawNextPiece();
+if (!isGameOver) {
+gameLoop = setInterval(dropPiece, fallInterval);
 }
 } else {
-tegnSpill();
+drawGame();
 }
 }
-function vekslePause() {
-if (spillSlutt) return;
-erPauset = !erPauset;
-if (erPauset) {
-clearInterval(spillLøkke);
-spillKontainer.classList.add('pauset');
+function togglePause() {
+if (isGameOver) return;
+isPaused = !isPaused;
+if (isPaused) {
+clearInterval(gameLoop);
+gameContainer.classList.add('paused');
 } else {
-spillLøkke = setInterval(slippBrikke, fallintervall);
-spillKontainer.classList.remove('pauset');
+gameLoop = setInterval(dropPiece, fallInterval);
+gameContainer.classList.remove('paused');
 }
 }
 document.addEventListener('keydown', (e) => {
-if (e.key === 'p' || e.key === 'P') {
-vekslePause();
+if (e.key.toLowerCase() === 'p') {
+togglePause();
 return;
 }
-if (spillSlutt || !gjeldendeBrikke || erPauset) return;
+if (isGameOver || !currentPiece || isPaused) return;
 let handled = true;
 switch (e.key) {
 case 'ArrowLeft':
-if (erGyldigTrekk(gjeldendeBrikke, -1, 0)) gjeldendeBrikke.x--;
+if (isValidMove(currentPiece, -1, 0)) currentPiece.x--;
 break;
 case 'ArrowRight':
-if (erGyldigTrekk(gjeldendeBrikke, 1, 0)) gjeldendeBrikke.x++;
+if (isValidMove(currentPiece, 1, 0)) currentPiece.x++;
 break;
 case 'ArrowDown':
-if (erGyldigTrekk(gjeldendeBrikke, 0, 1)) {
-gjeldendeBrikke.y++;
-poeng += 1;
-poengVisning.textContent = poeng;
+if (isValidMove(currentPiece, 0, 1)) {
+currentPiece.y++;
+score += 1;
+scoreDisplay.textContent = score;
 }
 break;
 case 'ArrowUp':
-roter(gjeldendeBrikke);
+rotate(currentPiece);
 break;
 case ' ':
 e.preventDefault();
-let raderSlippet = 0;
-while (erGyldigTrekk(gjeldendeBrikke, 0, 1)) {
-gjeldendeBrikke.y++;
-raderSlippet++;
+let rowsDropped = 0;
+while (isValidMove(currentPiece, 0, 1)) {
+currentPiece.y++;
+rowsDropped++;
 }
-poeng += raderSlippet;
-poengVisning.textContent = poeng;
-slippBrikke();
+score += rowsDropped;
+scoreDisplay.textContent = score;
+dropPiece();
 break;
 default:
 handled = false;
 break;
 }
-if (handled) tegnSpill();
+if (handled) drawGame();
 });
-statusKnapp.addEventListener('click', startPaaNytt);
-nullstillHighscoreKnapp.addEventListener('click', nullstillHighscores);
+statusButton.addEventListener('click', restartGame);
+resetHighscoreButton.addEventListener('click', resetHighscores);
 let resizeTimer;
 window.addEventListener('resize', () => {
 clearTimeout(resizeTimer);
-resizeTimer = setTimeout(vedVinduEndring, 150);
+resizeTimer = setTimeout(onWindowResize, 150);
 });
-settSpillSkala();
-visHighscores();
-visStartSkjerm();
+updateStaticUIText();
+setGameScale();
+displayHighscores();
+showStartScreen();
 </script>
 </body>
 </html>
