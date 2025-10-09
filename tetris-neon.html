@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tetris Puzzle Block Game Online</title>
-<meta name="description" content="Enjoy the classic Tetris game directly in your browser, complete with high score saving and a handy pause button.">
+<meta name="description" content="Enjoy the classic Tetris game directly in your browser, complete with high score saving and a handy pause key.">
 <meta name="author" content="Johnny Heggelund">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://morepcfun.github.io/tetris/tetris-neon.html">
@@ -304,7 +304,7 @@ text-align: center;
 </div>
 </div>
 <script>
-// --- LANGUAGE & TEXT CONFIGURATION ---
+
 const lang = {
 title: "Tetris",
 score: "Score",
@@ -325,7 +325,6 @@ pauseOverlay: "PAUSED",
 noHighscores: "No high scores yet"
 };
 
-// --- DOM ELEMENT REFERENCES ---
 const gameCanvas = document.getElementById('gameCanvas');
 const ctx = gameCanvas.getContext('2d');
 const nextPieceCanvas = document.getElementById('nextPieceCanvas');
@@ -340,7 +339,6 @@ const gameContainer = document.querySelector('.game-container');
 const highscoreList = document.getElementById('highscore-list');
 const resetHighscoreButton = document.getElementById('resetHighscoreButton');
 
-// --- GAME CONSTANTS ---
 const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
 const HIGHSCORE_KEY = 'tetrisHighscores';
@@ -363,7 +361,6 @@ const EMOJI_REWARDS = [
 '🦇', '🦈', '🦋', '🦌', '🦍', '🦎', '🦒', '🦜', '🥉', '🥈', '🥇',
 ];
 
-// --- GAME STATE VARIABLES ---
 let blockSize;
 let previewBlockSize;
 let board = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
@@ -377,7 +374,6 @@ let isGameOver = false;
 let isPaused = false;
 let resizeTimer;
 
-// --- UI & INITIALIZATION ---
 function updateStaticUIText() {
 document.title = lang.title;
 document.getElementById('score-label').textContent = lang.score;
@@ -423,7 +419,6 @@ statusButton.textContent = lang.startGame;
 gameStatusScreen.style.display = 'flex';
 }
 
-// --- CORE GAME LOGIC ---
 function createPiece() {
 const typeId = Math.floor(Math.random() * TETROMINOES.length);
 const shape = TETROMINOES[typeId];
@@ -462,7 +457,6 @@ piece.shape = newShape;
 return;
 }
 
-// Simple wall-kick attempts
 const kicks = [[-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]];
 for (const [kx, ky] of kicks) {
 if (isValidMove(piece, kx, ky, newShape)) {
@@ -495,7 +489,7 @@ if (board[row].every((cell) => cell > 0)) {
 rowsCleared++;
 board.splice(row, 1);
 board.unshift(Array(BOARD_WIDTH).fill(0));
-row++; // Re-check the same row index as it's now a new row
+row++;
 }
 }
 if (rowsCleared > 0) {
@@ -530,16 +524,15 @@ while (isValidMove(currentPiece, 0, 1)) {
 currentPiece.y++;
 rowsDropped++;
 }
-score += rowsDropped * 2; // Extra points for hard drop
+score += rowsDropped * 2;
 scoreDisplay.textContent = score;
-dropPiece(); // This will immediately freeze and spawn the next piece
+dropPiece();
 }
 
 function gameLoopTick() {
 dropPiece();
 }
 
-// --- SCORING & LEVELING ---
 function updateScore(lines) {
 const pointsPerLine = [0, 100, 300, 500, 800]; // 0, 1, 2, 3, 4 lines
 score += pointsPerLine[lines] * level;
@@ -569,12 +562,11 @@ const newEmoji = EMOJI_REWARDS[emojiIndex];
 if (rewardEmojiDisplay.textContent !== newEmoji) {
 rewardEmojiDisplay.textContent = newEmoji;
 rewardEmojiDisplay.classList.remove('pop-in-animation');
-void rewardEmojiDisplay.offsetWidth; // Trigger reflow to restart animation
+void rewardEmojiDisplay.offsetWidth;
 rewardEmojiDisplay.classList.add('pop-in-animation');
 }
 }
 
-// --- HIGH SCORE MANAGEMENT ---
 function getHighscores() {
 const scores = localStorage.getItem(HIGHSCORE_KEY);
 return scores ? JSON.parse(scores) : [];
@@ -616,7 +608,6 @@ localStorage.removeItem(HIGHSCORE_KEY);
 displayHighscores();
 }
 
-// --- DRAWING FUNCTIONS ---
 function drawBlock(x, y, typeId, context, currentBlockSize, isShadow = false) {
 context.save();
 const color = COLORS[typeId];
@@ -689,7 +680,6 @@ const pieceHeight = shape.length * previewBlockSize;
 const startX = (nextPieceCanvas.width - pieceWidth) / 2;
 const startY = (nextPieceCanvas.height - pieceHeight) / 2;
 
-// Create a temporary piece for drawing, positioned correctly in the preview
 const previewPiece = {
 ...nextPiece,
 x: startX / previewBlockSize,
@@ -699,7 +689,6 @@ drawPiece(previewPiece, nextPieceCtx, previewBlockSize);
 }
 }
 
-// --- GAME FLOW & CONTROL ---
 function restartGame() {
 initializeGame();
 currentPiece = createPiece();
@@ -751,7 +740,7 @@ break;
 case 'ArrowDown':
 if (isValidMove(currentPiece, 0, 1)) {
 currentPiece.y++;
-score += 1; // Bonus point for soft drop
+score += 1;
 scoreDisplay.textContent = score;
 }
 break;
@@ -775,7 +764,6 @@ drawGame();
 drawNextPiece();
 }
 
-// --- EVENT LISTENERS ---
 document.addEventListener('keydown', handleKeyDown);
 statusButton.addEventListener('click', restartGame);
 resetHighscoreButton.addEventListener('click', resetHighscores);
@@ -784,7 +772,6 @@ clearTimeout(resizeTimer);
 resizeTimer = setTimeout(onWindowResize, 150);
 });
 
-// --- INITIALIZE ON LOAD ---
 function init() {
 updateStaticUIText();
 setGameScale();
